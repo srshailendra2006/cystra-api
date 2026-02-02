@@ -6,8 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "db:init": "node dbInit.js",
-    "db:setup": "node dbInit.js",
+    "db:init": "node dbInitCompanyBranch.js",
+    "db:setup": "node dbInitCompanyBranch.js",
+    "db:init:old": "node dbInit.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -22,6 +23,7 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-validator": "^7.0.1",
@@ -29,6 +31,7 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "mssql": "^12.1.0",
+    "multer": "^2.0.2",
     "pg": "^8.11.3",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"

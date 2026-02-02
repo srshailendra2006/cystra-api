@@ -1,0 +1,2 @@
+cylinder_code,cylinder_family_code,owner_type,owner_party_id,serial_number,barcode_number,cylinder_type,gas_content,capacity,capacity_unit,manufacturer,manufacture_no,challan_no,manufacture_date,status
+CYL-001,FAM-01,SELF,, ,BC123456789,Oxygen,Oxygen,50,Liters,XYZ Corp,MFG-2023-10,CH-1001,2023-01-15,available

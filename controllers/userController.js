@@ -1,6 +1,52 @@
 const userService = require('../services/userService');
 
 class UserController {
+  /**
+   * Create a new user (POST /api/v1/users)
+   * Requires authentication - created_by comes from JWT token
+   */
+  async createUser(req, res) {
+    try {
+      const userData = {
+        company_id: parseInt(req.body.company_id) || req.user?.company_id,
+        branch_id: parseInt(req.body.branch_id) || req.user?.branch_id,
+        username: req.body.username,
+        email: req.body.email,
+        password: req.body.password,
+        first_name: req.body.first_name,
+        last_name: req.body.last_name,
+        phone: req.body.phone,
+        role_id: parseInt(req.body.role_id)
+      };
+
+      // Get created_by from JWT token (logged-in user's ID)
+      const createdBy = req.user?.user_id;
+
+      if (!createdBy) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Authentication required. Please login first.'
+        });
+      }
+
+      const result = await userService.createUser(userData, createdBy);
+
+      res.status(201).json({
+        status: 'success',
+        message: 'User created successfully',
+        data: {
+          user_id: result.user_id
+        }
+      });
+    } catch (error) {
+      console.error('Create user error:', error);
+      res.status(error.status || 500).json({
+        status: 'error',
+        message: error.message || 'Failed to create user'
+      });
+    }
+  }
+
   // Get all users
   async getAllUsers(req, res) {
     try {

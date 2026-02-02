@@ -120,30 +120,37 @@ app.use((err, req, res, next) => {
 });
 
 // ======================================================
-// 🏁 Start the Server (with dynamic port handling)
+// 🏁 Start the Server (Fixed Port Only - No Auto-Selection)
 // ======================================================
-function startServer(port) {
-  const server = app.listen(port);
+const server = app.listen(PORT, () => {
+  console.log('\n' + '═'.repeat(60));
+  console.log(`🚀 Cystra API Server Started Successfully`);
+  console.log('═'.repeat(60));
+  console.log(`📍 Port:           ${PORT}`);
+  console.log(`🌍 Environment:    ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 API Base URL:   http://localhost:${PORT}/api/v1`);
+  console.log(`📊 Swagger Docs:   http://localhost:${PORT}/api-docs`);
+  console.log(`💚 Health Check:   http://localhost:${PORT}/health`);
+  console.log('═'.repeat(60) + '\n');
+});
 
-  server.on("listening", () => {
-    const actualPort = server.address().port;
-    console.log(`🚀 Server running successfully on http://localhost:${actualPort}`);
-    console.log(`✅ Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`✅ API URL: http://localhost:${actualPort}/api/v1`);
-    console.log(`✅ Health Check: http://localhost:${actualPort}/health`);
-  });
-
-  server.on("error", (err) => {
-    if (err.code === "EADDRINUSE") {
-      console.warn(`⚠️ Port ${port} is busy, trying a different one...`);
-      startServer(0); // 0 = auto-select an available port
-    } else {
-      console.error("❌ Server error:", err);
-    }
-  });
-}
-
-startServer(PORT);
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.error('\n' + '═'.repeat(60));
+    console.error(`❌ ERROR: Port ${PORT} is already in use!`);
+    console.error('═'.repeat(60));
+    console.error('\n💡 Solutions:');
+    console.error(`   1. Kill the process using port ${PORT}:`);
+    console.error(`      lsof -i :${PORT} | grep LISTEN`);
+    console.error(`      kill -9 <PID>`);
+    console.error(`   2. Change PORT in .env file to a different port`);
+    console.error(`   3. Stop other applications using port ${PORT}\n`);
+    process.exit(1);
+  } else {
+    console.error("❌ Server error:", err);
+    process.exit(1);
+  }
+});
 
 module.exports = app;
 

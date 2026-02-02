@@ -4,7 +4,7 @@ require('dotenv').config();
 // SQL Server configuration
 const config = {
   user: process.env.DB_USER || 'sa',
-  password: process.env.DB_PASSWORD || '',
+  password: process.env.DB_PASS || '',
   server: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '1433'),
   database: process.env.DB_NAME || 'cystra_db',

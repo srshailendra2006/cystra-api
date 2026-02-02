@@ -1,0 +1,3 @@
+party_code,gas_code,cylinder_family_code,uom_code,ownership_type,rate,currency,effective_from,effective_to
+,O2,,KG,OWN,555.00,INR,2026-03-01,
+P-001,O2,FAM-01,KG,PARTY,600.00,INR,2026-03-01,2026-03-31
