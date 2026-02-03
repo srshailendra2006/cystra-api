@@ -338,9 +338,12 @@ class PartyController {
           const address1 = get(row, ['address1', 'address_1', 'address']);
           const address2 = get(row, ['address2', 'address_2']);
           const address3 = get(row, ['address3', 'address_3']);
-          const city_id = toInt(get(row, ['city_id', 'cityId']));
-          const state_id = toInt(get(row, ['state_id', 'stateId']));
-          const country_id = toInt(get(row, ['country_id', 'countryId']));
+          let city_id = toInt(get(row, ['city_id', 'cityId']));
+          let state_id = toInt(get(row, ['state_id', 'stateId']));
+          let country_id = toInt(get(row, ['country_id', 'countryId']));
+          const city_name = get(row, ['city_name', 'cityName']);
+          const state_name = get(row, ['state_name', 'stateName']);
+          const country_name = get(row, ['country_name', 'countryName']);
           const pincode = get(row, ['pincode', 'pin_code', 'pinCode']);
           const is_default = toBitOrNull(get(row, ['is_default', 'isDefault']));
           const hasAddress = !!(address_type || address1 || address2 || address3 || city_id || state_id || country_id || pincode || is_default !== null);
@@ -353,6 +356,43 @@ class PartyController {
             const allowed = new Set(['billing', 'shipping', 'registered', 'office', 'plant', 'other']);
             if (!allowed.has(at)) {
               throw new Error('address_type must be one of Billing, Shipping, Registered, Office, Plant, Other');
+            }
+          }
+          // If IDs are missing but names are provided, resolve names -> IDs via master tables
+          if (hasAddress) {
+            const needsResolve =
+              (!country_id && country_name) ||
+              (!state_id && state_name) ||
+              (!city_id && city_name);
+            if (needsResolve) {
+              // Resolve Country
+              if (!country_id && country_name) {
+                const r = await pool.request()
+                  .input('name', sql.NVarChar(200), country_name)
+                  .query(`SELECT TOP 1 CountryID as id FROM dbo.CountryMaster WHERE CountryName = @name`);
+                country_id = r.recordset?.[0]?.id ?? null;
+                if (!country_id) throw new Error(`Invalid country_name: ${country_name}`);
+              }
+              // Resolve State (requires country_id if using name)
+              if (!state_id && state_name) {
+                if (!country_id) throw new Error('state_name provided but country_id/country_name is missing');
+                const r = await pool.request()
+                  .input('country_id', sql.Int, country_id)
+                  .input('name', sql.NVarChar(200), state_name)
+                  .query(`SELECT TOP 1 StateID as id FROM dbo.StateMaster WHERE CountryID=@country_id AND StateName=@name`);
+                state_id = r.recordset?.[0]?.id ?? null;
+                if (!state_id) throw new Error(`Invalid state_name for country: ${state_name}`);
+              }
+              // Resolve City (requires state_id if using name)
+              if (!city_id && city_name) {
+                if (!state_id) throw new Error('city_name provided but state_id/state_name is missing');
+                const r = await pool.request()
+                  .input('state_id', sql.Int, state_id)
+                  .input('name', sql.NVarChar(200), city_name)
+                  .query(`SELECT TOP 1 CityID as id FROM dbo.CityMaster WHERE StateID=@state_id AND CityName=@name`);
+                city_id = r.recordset?.[0]?.id ?? null;
+                if (!city_id) throw new Error(`Invalid city_name for state: ${city_name}`);
+              }
             }
           }
 
